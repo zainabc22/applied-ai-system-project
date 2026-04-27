@@ -1,73 +1,41 @@
-# 💭 Reflection: Game Glitch Investigator
+# 💭 Reflection: Glitchy Guesser — Applied AI System
 
-## 1. What was broken when you started?
+## 1. What are the limitations or biases in your system?
 
-1. Bug 1: Attempts counter started at 1 instead of 0. 
+The biggest limitation is the knowledge base itself. It only contains 7 tips, all written from a single perspective — binary search strategy. This means the AI Coach will always nudge the player toward midpoint guessing, even if a different approach might work better for a specific player's style. The system has no way to learn from past games or adapt to how an individual player actually behaves.
 
-When I started the game, I expected the attempts counter should start at 0 so the first guess counts as attemp 1. 
+There is also a retrieval bias built into the tag matching logic. The "first_guess" tip fires on every single first attempt regardless of context, which means a player who already knows binary search strategy will receive redundant advice on their opening guess every game. The retriever does not know anything about the player's skill level — it only knows the current game state.
 
-However 'st.session_state.attempts' was initialized to 1, which meant the game started one attempt ahead and impacted the 'update_Score' function from the first guess, since 'attempt_number' went directly into the points formula.
+Finally, the LLaMA model itself may have biases from its training data. Since the prompt is tightly constrained by retrieved tips, this risk is reduced — but the model still controls the tone and phrasing of every coaching message, and there is no guarantee it will always be encouraging rather than discouraging.
 
-2. Bug 2: 'check_guess' returned backwards direction hints
+---
 
-If my guess was too high - example 8-, but the secret is 50, the hint should say to 'GO LOWER' instead it said 'GO HIGHER.'
-The hints were inverted and mislad the player (me) in the wrong direction. 
+## 2. Could your AI be misused, and how would you prevent that?
 
-3. Bug 3: New game ignored the difficulty level and always picked from 1-100. 
+The AI Coach in this game has a narrow scope, so direct misuse is limited. However, there are a few realistic risks worth noting.
 
-When clicking 'New Game' on 'Hard' mode, it should've geenrated a secret number within 1-50. 
+The Groq API key, if exposed, could be used by others to make API calls at the key owner's expense. This is prevented by storing the key in a `.env` file that is excluded from GitHub via `.gitignore`, so the key is never committed to the repository.
 
-However, the 'new_game' block hardcoded 'random.randint(1-100) instead of calling 'get_range_for_difficulty(difficulty), so the difficulty setting was ignored on reset. 
+The prompt sent to the model includes game state information like difficulty, attempts left, and outcome. If someone modified `rag_utils.py` to inject arbitrary text into the prompt, they could attempt a prompt injection attack — feeding the model instructions disguised as game context. This could be mitigated by sanitizing all inputs before they enter the prompt and by keeping the system prompt strict.
 
+Finally, because the AI Coach speaks in an encouraging tone, a poorly designed version of this system could theoretically be used to keep players engaged beyond what is healthy — a dark pattern common in game design. The current implementation does not do this, but it is worth being aware of when building AI systems in consumer-facing games.
 
-## 2. How did you use AI as a teammate?
+---
 
-I asked Claude AI to move check_guess from app.py into logic_utils.py to fix the inverted hint messages and remove 'TypeError' except block.
-Claude was able to:
--  replaced the 'NotImplementedError' stub in 'logic_tils.py' with the real implementation.
-- fix the guess>secret to return 'GO LOWER' instead of 'GO HIGHER'
-- Add the import 'from logic_utils import check _guess' to 'app.py'
-- remove the original duplicate lines - 17-line 'check_Guess' definition from 'app.py'
+## 3. What surprised you while testing your AI's reliability?
 
-I verified this by running 'pytest' and by manually testing in the live Streamlit app. A high number now correctly showed 'GO LOWER'.
+Two things stood out.
 
+First, the fallback behavior was more reliable than expected. When the Groq API failed due to an invalid key or a decommissioned model, the except block caught the error silently and displayed the raw tip text from the knowledge base instead. From the player's perspective, the game kept working — they still received a coaching message. This made the system feel more robust than it actually was under the hood, which was both reassuring and a little concerning.
 
-An AI suggestion that was incorrect/misleading was - removing the 'TypeError' block without fixing the root cause. 
-What happened here is that I asked Copilot to remove the 'TypeError' except block from 'check_guess,' it did so correctly, but it didn't catch that the root cause of the mismatch was still in 'app.py'. 
-When I was playing the game and entering guesses like 97 and 99, it triggered the crash. This was fixed and verified by removing str/int cast entirely and always passing the integer secret. 
+Second, the model's output quality was surprisingly consistent given how small the retrieved context was. Passing in 2-3 short tip strings was enough for LLaMA 3.3 to generate a coherent, specific, encouraging coaching message every time. The tight prompt structure — telling the model to use only the retrieved tips and nothing else — was the key factor. Without that constraint, early testing showed the model would occasionally ignore the tips and give generic advice.
 
+---
 
-## 3. Debugging and testing your fixes
+## 4. Describe your collaboration with AI during this project
 
-- How did you decide whether a bug was really fixed?
+**One instance where AI gave a helpful suggestion:**
+When building the RAG pipeline, I asked Claude to explain how `attempt_number` fed into the `update_score` point calculation. Claude traced the full data flow and explained that because `attempts` was initialized to 1 instead of 0, the first guess was already being treated as attempt 2 in the scoring formula — giving fewer points than intended. This framing helped me understand that the bug was not just a display issue but had real downstream effects on scoring. That explanation led directly to the correct fix.
 
-I used a two-step check for each bug. First I ran pytest to confirm the automated test passed — this told me the logic function itself was behaving correctly in isolation. Then I ran the live Streamlit app and manually triggered the exact scenario that caused the original bug. A passing test alone wasn't enough, because Bug 2 showed that the logic in logic_utils.py could be correct while the code in app.py was still broken. Both layers had to work together before I considered a bug truly fixed.
-
-- Describe at least one test you ran (manual or using pytest) and what it showed you about your code.
-
-The most revealing test was test_check_guess_too_high() for Bug 2. Before the fix, this test would have passed the outcome assert but failed on "LOWER" because the message was returning "Go HIGHER" instead. After fixing the hint messages in logic_utils.py, the test passed — but the game still crashed on even-numbered attempts with a TypeError. That told me the function itself was correct but something upstream in app.py was passing the wrong type into it. The test isolated exactly where the problem wasn't, which pointed me to where it actually was — the str cast on st.session_state.secret.
-
-- Did AI help you design or understand any tests? How?
-
-Yes.I asked Claude AI to suggest a pytest case for each bug fix, and it gave me a useful starting structure. For Bug 1, it explained that the best way to test the attempts initialization was to call update_score directly with attempt_number=1 and assert the expected point value, since that's where the off-by-one error had downstream impact. That framing — testing the consequence of the bug, not just the line that changed — helped me write more meaningful tests than simply checking attempts == 0. However, Copilot did not suggest testing the str/int crash scenario for Bug 2, which I had to identify and verify manually by playing the game.
-
-## 4. What did you learn about Streamlit and state?
-
-- How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
-
-Every time you click a button or type something, Streamlit reruns the entire script from the top. Without st.session_state, everything resets — your score, your guesses, the secret number. Session state is a notebook that survives reruns, so the game remembers where you left off. The not in st.session_state guard is how you say "only set this on the very first run, leave it alone after that." Bug 1 was a direct result of getting this wrong — initializing attempts to 1 every time instead of just once.
-
-## 5. Looking ahead: your developer habits
-
-- What is one habit or strategy from this project that you want to reuse in future labs or projects?
-  - This could be a testing habit, a prompting strategy, or a way you used Git.
-
-Starting a fresh Copilot Chat session for each individual bug. Keeping the AI focused on one problem at a time produced much cleaner suggestions than mixing multiple bugs into one conversation. Combined with using #file: context variables to point Copilot at the exact files involved, this made the AI's responses specific and actionable rather than generic. I'll carry this "one session per problem" approach into any future project where I'm using AI assistance.
- 
-- What is one thing you would do differently next time you work with AI on a coding task?
-
-Before asking the AI to fix anything, I would first ask it to trace the full data flow of the bug — from where the value originates to where it's used. For Bug 2, asking "how does secret travel from st.session_state into check_guess?" before requesting a fix would have caught the str cast in app.py upfront, instead of discovering it as a crash after the fact. Understanding first, fixing second.
-
-- In one or two sentences, describe how this project changed the way you think about AI generated code.
-
-I came in assuming that if the AI's code looked clean and ran without immediate errors, it was probably correct — this project proved that wrong. AI can produce confident, well-formatted code that fixes the symptom while leaving the root cause completely untouched, and the only way to catch that is to read carefully, test deliberately, and never skip the step of running it yourself.
+**One instance where AI gave a flawed or incomplete suggestion:**
+When fixing Bug 2, I asked Copilot to remove the `TypeError` except block from `check_guess`. It did so correctly — but it did not catch that the root cause of the type mismatch was still in `app.py`, where `st.session_state.secret` was being cast to a string before being passed into the function. The AI fixed the symptom without identifying the cause. The game continued to crash on even-numbered attempts until I manually traced the data flow and removed the string cast in `app.py` myself. This was a clear reminder that AI suggestions need to be verified end-to-end, not just at the function level.
