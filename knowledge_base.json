@@ -1,0 +1,37 @@
+[
+  {
+    "tag": "first_guess",
+    "situation": "Player is on their first attempt",
+    "tip": "Start in the middle of the range to eliminate half the numbers immediately."
+  },
+  {
+    "tag": "far_off",
+    "situation": "Guess was more than 20 away from secret",
+    "tip": "You're far off — make a bold jump toward the center of the remaining range."
+  },
+  {
+    "tag": "close",
+    "situation": "Guess was within 10 of the secret",
+    "tip": "You're getting close! Split the remaining gap in half for your next guess."
+  },
+  {
+    "tag": "very_close",
+    "situation": "Guess was within 3 of the secret",
+    "tip": "Almost there! Try one number higher or lower than your last guess."
+  },
+  {
+    "tag": "few_attempts_left",
+    "situation": "Player has 2 or fewer attempts remaining",
+    "tip": "High pressure! Use binary search — pick the exact midpoint of what's left."
+  },
+  {
+    "tag": "too_high",
+    "situation": "Player guessed too high",
+    "tip": "Go lower. Cut the upper half of your range — the secret is below your guess."
+  },
+  {
+    "tag": "too_low",
+    "situation": "Player guessed too low",
+    "tip": "Go higher. Cut the lower half of your range — the secret is above your guess."
+  }
+]
