@@ -170,3 +170,6 @@ If extending this further, the next step would be a RAG Enhancement: replacing t
 
 ![AI Coach in action](assets/game_demo.png)
 
+## 🎥 Video Walkthrough
+
+[Watch the walkthrough here](https://drive.google.com/file/d/1GXq6oGCAB_1ShV5bDUa-F9r3sFr2CKrM/view?usp=sharing)
