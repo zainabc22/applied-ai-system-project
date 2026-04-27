@@ -46,7 +46,7 @@ The system has four layers:
 
 **AI Generation Layer** (Groq API / LLaMA 3.3) — The augmented prompt is sent to the model, which generates a personalized 2-3 sentence coaching message grounded in the retrieved tips.
 
-![System Architecture](assets/system_architecture.png)
+![System Architecture](assets/glitchy_guesser_system_architecture.svg) 
 
 ---
 
