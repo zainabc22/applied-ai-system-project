@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 from rag_utils import retrieve_tips, build_coach_prompt
 import anthropic
 import random
