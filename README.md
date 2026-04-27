@@ -167,3 +167,4 @@ If extending this further, the next step would be a RAG Enhancement: replacing t
 ![Winning game screenshot](image.png)
 
 ![AI Coach in action](assets/game_demo.png)
+
