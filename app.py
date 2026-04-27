@@ -159,6 +159,7 @@ if submit:
             attempts_left=attempt_limit - st.session_state.attempts,
             distance=distance,
             outcome=outcome,
+            difficulty=difficulty,
         )
 
         if tips:

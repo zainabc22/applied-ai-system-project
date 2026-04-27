@@ -1,0 +1,27 @@
+[
+  {
+    "tag": "easy_mode",
+    "difficulty": "Easy",
+    "tip": "You have a small range of 1-20 — start at 10 to cut it perfectly in half."
+  },
+  {
+    "tag": "normal_mode",
+    "difficulty": "Normal",
+    "tip": "With 1-100 and 8 attempts, binary search is optimal — always guess the midpoint of your remaining range."
+  },
+  {
+    "tag": "hard_mode",
+    "difficulty": "Hard",
+    "tip": "Hard mode gives you only 5 attempts for 1-50 — every guess must cut the range in half or you will run out."
+  },
+  {
+    "tag": "hard_low_attempts",
+    "difficulty": "Hard",
+    "tip": "You are running low on attempts in Hard mode — do not guess randomly, calculate the exact midpoint of what remains."
+  },
+  {
+    "tag": "easy_close",
+    "difficulty": "Easy",
+    "tip": "You are very close in Easy mode — the answer is within 3 numbers of your last guess."
+  }
+]

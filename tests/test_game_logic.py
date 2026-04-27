@@ -80,3 +80,20 @@ def test_retrieve_tips_max_three():
     # Should never return more than 3 tips
     tips = retrieve_tips(attempt_number=1, attempts_left=2, distance=2, outcome="Too Low")
     assert len(tips) <= 3
+
+# RAG Enhancement tests
+def test_retrieve_tips_hard_mode_first_guess():
+    tips = retrieve_tips(attempt_number=1, attempts_left=4, distance=25, outcome="Too Low", difficulty="Hard")
+    tags = [t["tag"] for t in tips]
+    assert "hard_mode" in tags
+
+def test_retrieve_tips_easy_mode_first_guess():
+    tips = retrieve_tips(attempt_number=1, attempts_left=5, distance=10, outcome="Too High", difficulty="Easy")
+    tags = [t["tag"] for t in tips]
+    assert "easy_mode" in tags
+
+def test_retrieve_tips_hard_low_attempts():
+    tips = retrieve_tips(attempt_number=4, attempts_left=1, distance=5, outcome="Too Low", difficulty="Hard")
+    tags = [t["tag"] for t in tips]
+    assert "hard_low_attempts" in tags
+    
