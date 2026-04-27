@@ -20,11 +20,12 @@ The AI Coach actively changes what the system says based on what was retrieved �
 applied-ai-system-project/
 ├── assets/                  # System architecture diagram
 ├── tests/
-│   └── test_game_logic.py   # 14 pytest tests covering game logic and RAG
+│   └── test_game_logic.py   # 17 pytest tests covering game logic and RAG
 ├── app.py                   # Main Streamlit app
 ├── logic_utils.py           # Game logic: check_guess, update_score, get_range_for_difficulty
 ├── rag_utils.py             # RAG pipeline: retrieve_tips, build_coach_prompt
 ├── knowledge_base.json      # Local tip database (7 tagged strategy tips)
+├── difficulty_tips.json     # Difficulty-specific tip database
 ├── requirements.txt         # Dependencies
 ├── .env                     # API key (not committed to GitHub)
 ├── .gitignore
@@ -130,7 +131,7 @@ Separating logic from the UI makes testing easier and keeps app.py focused on di
 
 ## 🧪 Testing Summary
 
-14 pytest tests covering all core logic and the RAG pipeline. All 14 pass.
+17 pytest tests covering all core logic and the RAG pipeline. All 14 pass.
 
 | Category | Tests | Result |
 |---|---|---|
@@ -138,6 +139,7 @@ Separating logic from the UI makes testing easier and keeps app.py focused on di
 | Difficulty ranges | 2 | Pass |
 | Score calculation | 1 | Pass |
 | RAG retrieval | 6 | Pass |
+| RAG Enhancement (difficulty tips) | 3 | Pass |
 | Edge cases | 1 | Pass |
 
 **What the tests proved:**
